@@ -1,10 +1,11 @@
 import os
+import argparse
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
 api_key = os.environ.get("OPENROUTER_API_KEY")
-if api_key == None:
+if api_key is None:
     raise RunTimeError("API Key Not Found")
 
 client = OpenAI(
@@ -13,17 +14,21 @@ client = OpenAI(
 )
 
 def main():
+    parser = argparse.ArgumentParser(description="Chatbot")
+    parser.add_argument("user_prompt", type=str, help="User prompt")
+    args = parser.parse_args()
+
     response = client.chat.completions.create(
     model="openrouter/free",
     messages=[
         {
             "role": "user",
-            "content": "Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.",
+            "content": args.user_prompt,
         }
     ],
 )
     if response.usage is None:
-        raise RunTimeError("API request failed or did not return token usage statistics.")
+        raise RuntimeError("API request failed or did not return token usage statistics.")
     
     print(f"Prompt tokens: {response.usage.prompt_tokens}")
     print(f"Response tokens: {response.usage.completion_tokens}")
